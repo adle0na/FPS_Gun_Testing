@@ -1,4 +1,4 @@
-
+using TMPro;
 using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -24,6 +24,9 @@ public class GunSystem : MonoBehaviour
     // Graphics
     public CamShake camShake;
     public float camShakeMagnitude, camShakeDuration;
+    public GameObject muzzleFlash, bulletHoleGraphic;
+    public TextMeshProUGUI text;
+    
     private void Awake()
     {
         bulletsLeft = magazineSize;
@@ -32,6 +35,9 @@ public class GunSystem : MonoBehaviour
     private void Update()
     {
         GunInput();
+        
+        // SetText
+        text.SetText(bulletsLeft + " / " + magazineSize);
     }
 
     void Start()
@@ -71,7 +77,7 @@ public class GunSystem : MonoBehaviour
         {
             spread = spread * 1.5f;
         }
-        else spread = "normal spread";
+        else spread = spread;
         
         // Calculate Direction with Spread
         Vector3 direction = fpsCam.transform.forward + new Vector3(x, y, 0);
@@ -83,13 +89,18 @@ public class GunSystem : MonoBehaviour
 
             if (rayHit.collider.CompareTag("Enemy"))
             {
+                Debug.Log("Enemy Shot!");
                 // Null Reference ShootingAi, TakeDamage
-                rayHit.collider.GetComponent<ShootingAi>().TakeDamage(gunDamage);
+                //rayHit.collider.GetComponent<ShootingAi>().TakeDamage(gunDamage);
             }
         }
         
         // ShakeCamera
         camShake.Shake(camShakeMagnitude, camShakeDuration);
+        
+        // Graphics
+        Instantiate(bulletHoleGraphic, rayHit.point, Quaternion.Euler(0, 100, 0));
+        Instantiate(muzzleFlash, attackPoint.position, Quaternion.identity);
         
         bulletsLeft--;
         bulletsShot--;
