@@ -5,6 +5,8 @@ using Random = UnityEngine.Random;
 
 public class GunSystem : MonoBehaviour
 {
+    #region Gun Variables, Componenet, Sound, (SFX)
+    
     // Gun stats
     public int gunDamage;
     public float timeBetweenShooting, spread, range, reloadTime, timeBetweenShots;
@@ -13,22 +15,24 @@ public class GunSystem : MonoBehaviour
     private int bulletsLeft, bulletsShot;
 
     private bool shooting, readyToShoot, reloading;
+    private Rigidbody gunRb;
 
     // Reference
     public Camera fpsCam;
     public Transform attackPoint;
     public RaycastHit rayHit;
     public LayerMask whatIsEnemy;
-    private Rigidbody playerRB;
     
-    // Graphics
+    // Graphics ( Without Sound )
     public CamShake camShake;
     public float camShakeMagnitude, camShakeDuration;
     public GameObject muzzleFlash, bulletHoleGraphic;
     public TextMeshProUGUI text;
+    #endregion
     
     private void Awake()
     {
+        gunRb = GetComponent<Rigidbody>();
         bulletsLeft = magazineSize;
         readyToShoot = true;
     }
@@ -40,10 +44,7 @@ public class GunSystem : MonoBehaviour
         text.SetText(bulletsLeft + " / " + magazineSize);
     }
 
-    void Start()
-    {
-        playerRB = GetComponent<Rigidbody>();
-    }
+    #region Functions
     
     private void GunInput()
     {
@@ -73,7 +74,7 @@ public class GunSystem : MonoBehaviour
         // Spread
         float x = Random.Range(-spread, spread);
         float y = Random.Range(-spread, spread);
-        if (playerRB.velocity.magnitude > 0)
+        if (gunRb.velocity.magnitude > 0)
         {
             spread = spread * 1.5f;
         }
@@ -128,4 +129,5 @@ public class GunSystem : MonoBehaviour
         bulletsLeft = magazineSize;
         reloading = false;
     }
+    #endregion
 }
