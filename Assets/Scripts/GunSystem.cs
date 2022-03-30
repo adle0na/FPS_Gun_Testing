@@ -1,5 +1,6 @@
 using TMPro;
 using System;
+using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,15 +14,23 @@ public class GunSystem : MonoBehaviour
     public int magazineSize, bulletsPerTap;
     public bool allowButtonHold;
     private int bulletsLeft, bulletsShot;
+    public GameObject scopeOverlay;
+    public GameObject weaponCamera;
+    public Camera mainCamera;
+
+    public float scopedFOV = 15f;
+    private float normalFOV;
 
     private bool shooting, readyToShoot, reloading;
-    private Rigidbody gunRb;
-
+    private bool isScoped = false;
+    //private Rigidbody gunRb;
+    
     // Reference
     public Camera fpsCam;
     public Transform attackPoint;
     public RaycastHit rayHit;
     public LayerMask whatIsEnemy;
+    public Animator animator;
     
     // Graphics ( Without Sound )
     public CamShake camShake;
@@ -32,7 +41,7 @@ public class GunSystem : MonoBehaviour
     
     private void Awake()
     {
-        gunRb = GetComponent<Rigidbody>();
+        //gunRb = GetComponent<Rigidbody>();
         bulletsLeft = magazineSize;
         readyToShoot = true;
     }
@@ -42,6 +51,22 @@ public class GunSystem : MonoBehaviour
         
         // SetText
         text.SetText(bulletsLeft + " / " + magazineSize);
+
+        if (Input.GetButtonDown("Fire2"))
+        {
+            isScoped = !isScoped;
+            animator.SetBool("Scoped", isScoped);
+
+            if (isScoped)
+            {
+                StartCoroutine(OnScoped());
+            }
+            else
+            {
+                OnUnscoped();
+            }
+                
+        }
     }
 
     #region Functions
@@ -74,11 +99,11 @@ public class GunSystem : MonoBehaviour
         // Spread
         float x = Random.Range(-spread, spread);
         float y = Random.Range(-spread, spread);
-        if (gunRb.velocity.magnitude > 0)
+        /*if (gunRb.velocity.magnitude > 0)
         {
             spread = spread * 1.5f;
         }
-        else spread = spread;
+        else spread = spread;*/
         
         // Calculate Direction with Spread
         Vector3 direction = fpsCam.transform.forward + new Vector3(x, y, 0);
@@ -129,5 +154,24 @@ public class GunSystem : MonoBehaviour
         bulletsLeft = magazineSize;
         reloading = false;
     }
+
+    void OnUnscoped()
+    {
+        scopeOverlay.SetActive(false);
+        weaponCamera.SetActive(true);
+
+        mainCamera.fieldOfView = normalFOV;
+    }
+
+    IEnumerator OnScoped()
+    {
+        yield return new WaitForSeconds(.15f);
+        
+        scopeOverlay.SetActive(true);
+        weaponCamera.SetActive(false);
+        normalFOV = mainCamera.fieldOfView;
+        mainCamera.fieldOfView = scopedFOV;
+    }
+    
     #endregion
 }
